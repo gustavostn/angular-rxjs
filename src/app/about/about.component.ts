@@ -41,7 +41,10 @@ export class AboutComponent implements OnInit {
         )
         */
 
-        this._getCoursesUsingObservable()
+        /*
+        Chamada promise -> this._getCoursesUsingPromise()
+        Chamada com observable -> this._getCoursesUsingObservable()
+        */
     }
 
     /*
@@ -51,6 +54,7 @@ export class AboutComponent implements OnInit {
     }
     */
 
+    /*
     private _getCoursesUsingObservable(): any {
         const http$ = callHttp('/api/courses')
         const courses$ = http$
@@ -64,6 +68,7 @@ export class AboutComponent implements OnInit {
             () => console.warn("Completed!")
         )
     }
+    */
 
 
 
