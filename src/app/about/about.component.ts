@@ -1,5 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { fromEvent, interval, observable, Observable, timer } from 'rxjs';
+import { map } from 'rxjs/operators';
+import { callHtpp as callHttp } from '../common/util';
 
 @Component({
     selector: 'about',
@@ -9,14 +11,14 @@ import { fromEvent, interval, observable, Observable, timer } from 'rxjs';
 
 export class AboutComponent implements OnInit {
 
-    ngOnInit() { 
+    ngOnInit() {
         /*
         -- Interval com rxjs
         const interval$ = interval(1000)
         interval$.subscribe(value => console.log("Stream 1:", value))
         interval$.subscribe(value => console.log("Stream 2:", value))
         */
-        
+
         /*
         -- Executa o time (1000) após o tempo inicial (3000)
         const interval$ = timer(3000, 1000);
@@ -39,32 +41,31 @@ export class AboutComponent implements OnInit {
         )
         */
 
-        this._getCoursesUsingPromise()
         this._getCoursesUsingObservable()
     }
 
+    /*
+    -- Chamanda HTTP promise
     private async _getCoursesUsingPromise(): Promise<any> {
         return await fetch('/api/courses')
     }
+    */
 
     private _getCoursesUsingObservable(): any {
-        const http$ = new Observable(observable => {
-            fetch('/api/courses')
-                .then(response => { return response.json() })
-                .then(body => {
-                    observable.next(body)
-                    observable.complete()
-                    observable.next()
-                })
-                .catch(err => observable.error(err))
-        })
+        const http$ = callHttp('/api/courses')
+        const courses$ = http$
+            .pipe(
+                map(response => response.payload)
+            )
 
-        http$.subscribe(
+        courses$.subscribe(
             response => console.log(response),
             err => console.error('error response: ', err),
             () => console.warn("Completed!")
         )
     }
+
+
 
 
 }
