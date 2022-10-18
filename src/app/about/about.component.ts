@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { fromEvent, interval, timer } from 'rxjs';
+import { fromEvent, interval, observable, Observable, timer } from 'rxjs';
 
 @Component({
     selector: 'about',
@@ -38,6 +38,32 @@ export class AboutComponent implements OnInit {
             () => console.log('Completed')
         )
         */
+
+        this._getCoursesUsingPromise()
+        this._getCoursesUsingObservable()
+    }
+
+    private async _getCoursesUsingPromise(): Promise<any> {
+        return await fetch('/api/courses')
+    }
+
+    private _getCoursesUsingObservable(): any {
+        const http$ = new Observable(observable => {
+            fetch('/api/courses')
+                .then(response => { return response.json() })
+                .then(body => {
+                    observable.next(body)
+                    observable.complete()
+                    observable.next()
+                })
+                .catch(err => observable.error(err))
+        })
+
+        http$.subscribe(
+            response => console.log(response),
+            err => console.error('error response: ', err),
+            () => console.warn("Completed!")
+        )
     }
 
 
