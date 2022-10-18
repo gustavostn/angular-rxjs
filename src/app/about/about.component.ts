@@ -28,6 +28,16 @@ export class AboutComponent implements OnInit {
         const click$ = fromEvent(document, 'click')
         click$.subscribe(evt => console.log(evt))
         */
+
+        /*
+        -- Parametros dentro do subscribe
+        const clickOnDocument$ = fromEvent(document, 'click')
+        clickOnDocument$.subscribe(
+            evt => console.log('Get events: ', evt),
+            err => console.log('Get streams errs: ', err),
+            () => console.log('Completed')
+        )
+        */
     }
 
 
