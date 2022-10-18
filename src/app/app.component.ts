@@ -1,5 +1,4 @@
 import {Component, OnInit} from '@angular/core';
-import {Store} from './common/store.service';
 
 @Component({
   selector: 'app-root',
@@ -8,13 +7,8 @@ import {Store} from './common/store.service';
 })
 export class AppComponent implements  OnInit{
 
+  constructor() { }
 
-    constructor(private store:Store) {
-
-    }
-
-    ngOnInit() {
-        this.store.init();
-    }
+  ngOnInit() { }
 
 }

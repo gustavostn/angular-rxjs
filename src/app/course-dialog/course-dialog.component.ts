@@ -44,13 +44,7 @@ export class CourseDialogComponent implements AfterViewInit {
 
     }
 
-    save() {
-        this.store.saveCourse(this.course.id, this.form.value)
-            .subscribe(
-                () => this.close(),
-                err => console.log("Error saving course", err)
-            );
-    }
+    save() {}
 
 
 
