@@ -3,15 +3,15 @@ import { MAT_DIALOG_DATA, MatDialogRef } from "@angular/material/dialog";
 import {Course} from "../model/course";
 import {FormBuilder, Validators, FormGroup} from "@angular/forms";
 import * as moment from 'moment';
-import { concatMap, filter, mergeMap,  } from 'rxjs/operators';
-import { concat, from, Observable } from 'rxjs';
+import { concatMap, exhaustMap, filter, mergeMap,  } from 'rxjs/operators';
+import { concat, from, fromEvent, Observable } from 'rxjs';
 
 @Component({
     selector: 'course-dialog',
     templateUrl: './course-dialog.component.html',
     styleUrls: ['./course-dialog.component.css']
 })
-export class CourseDialogComponent implements OnInit {
+export class CourseDialogComponent implements OnInit, AfterViewInit {
 
     form: FormGroup;
 
@@ -41,6 +41,12 @@ export class CourseDialogComponent implements OnInit {
     ngOnInit(): void {
         // this._subscribeUsingConcactMap()
         this._subscribeUsingMergeMap()
+    }
+
+    ngAfterViewInit(): void {
+        fromEvent(this.saveButton.nativeElement, "click")
+            .pipe(exhaustMap(_ => this._saveCourse(this.form.value))) // Ignora novas requisições enquanto a anterior não finalizar
+            .subscribe()
     }
 
     private _subscribeUsingConcactMap(): void {
