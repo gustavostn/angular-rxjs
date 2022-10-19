@@ -3,7 +3,7 @@ import { MAT_DIALOG_DATA, MatDialogRef } from "@angular/material/dialog";
 import {Course} from "../model/course";
 import {FormBuilder, Validators, FormGroup} from "@angular/forms";
 import * as moment from 'moment';
-import { concatMap, filter,  } from 'rxjs/operators';
+import { concatMap, filter, mergeMap,  } from 'rxjs/operators';
 import { concat, from, Observable } from 'rxjs';
 
 @Component({
@@ -39,12 +39,26 @@ export class CourseDialogComponent implements OnInit {
     }
 
     ngOnInit(): void {
+        // this._subscribeUsingConcactMap()
+        this._subscribeUsingMergeMap()
+    }
+
+    private _subscribeUsingConcactMap(): void {
         this.form.valueChanges
             .pipe(
                 filter(_ => this.form.valid),
-                concatMap(changes => this._saveCourse(changes))
+                concatMap(changes => this._saveCourse(changes)) // Aguarda a conclusão da requisição p/ então iniciar uma nova
             )
             .subscribe()
+    }
+    
+    private _subscribeUsingMergeMap(): void {
+        this.form.valueChanges
+        .pipe(
+            filter(_ => this.form.valid),
+            mergeMap(changes => this._saveCourse(changes)) // Realiza uma nova requisição assim que a anterior for iniciada
+        )
+        .subscribe()
     }
 
     private _saveCourse(changes): Observable<any> {
