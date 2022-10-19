@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { concat, fromEvent, interval, merge, observable, Observable, of, timer } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { callHtpp as callHttp } from '../common/util';
+import { callHtpp, callHtpp as callHttp } from '../common/util';
 
 @Component({
     selector: 'about',
@@ -62,6 +62,8 @@ export class AboutComponent implements OnInit {
         const mergeResult$ = merge(interval$, interval2$)
         mergeResult$.subscribe(console.log)
         */
+
+        this._callGetCourses()
     }
 
     // Chamanda HTTP promise
@@ -87,6 +89,13 @@ export class AboutComponent implements OnInit {
         )
     }
     */
+
+    private _callGetCourses(): any {
+        const http$ = callHtpp('api/courses')
+        const sub = http$.subscribe(console.log)
+
+        setTimeout(() => { sub.unsubscribe() }, 0);
+    }
 }
 
 

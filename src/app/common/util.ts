@@ -2,7 +2,11 @@ import { Observable } from "rxjs"
 
 export function callHtpp(url: string): Observable<any> {
     return new Observable(observable => {
-        fetch(url)
+
+        const controller = new AbortController();
+        const signal = controller.signal
+
+        fetch(url, { signal })
             .then(response => { return response.json() })
             .then(body => {
                 observable.next(body)
@@ -10,6 +14,8 @@ export function callHtpp(url: string): Observable<any> {
                 observable.next()
             })
             .catch(err => observable.error(err))
+        
+        return () => controller.abort()
     })
 }
 
