@@ -12,27 +12,27 @@ import { callHtpp as callHttp } from '../common/util';
 export class AboutComponent implements OnInit {
 
     ngOnInit() {
+        // Interval com rxjs
         /*
-        -- Interval com rxjs
         const interval$ = interval(1000)
         interval$.subscribe(value => console.log("Stream 1:", value))
         interval$.subscribe(value => console.log("Stream 2:", value))
         */
 
+       // Executa o time (1000) após o tempo inicial (3000)
         /*
-        -- Executa o time (1000) após o tempo inicial (3000)
         const interval$ = timer(3000, 1000);
         interval$.subscribe(value => console.log("Time: ", value))
         */
 
+       // Ouvir eventos com o rxjs (click na aplicação)
         /* 
-        -- Escutar eventos com o rxjs
         const click$ = fromEvent(document, 'click')
         click$.subscribe(evt => console.log(evt))
         */
 
+       // Possíveis retornos do subscribe
         /*
-        -- Parametros dentro do subscribe
         const clickOnDocument$ = fromEvent(document, 'click')
         clickOnDocument$.subscribe(
             evt => console.log('Get events: ', evt),
@@ -41,13 +41,14 @@ export class AboutComponent implements OnInit {
         )
         */
 
+        // Chamando o método p/ realizar a requisição http com promise ou observable
         /*
         Chamada promise -> this._getCoursesUsingPromise()
         Chamada com observable -> this._getCoursesUsingObservable()
         */
 
+       // Utilizando o método concat p/ unir 2 variaveis observables em uma só
         /*
-        -- Utilizando o método concat p/ unir 2 variaveis observables em uma só
         const first$ = of('a', 'b', 'c')
         const second$ = of(1,2,3)
         const concatVariables$ = concat(first$, second$)
@@ -55,13 +56,14 @@ export class AboutComponent implements OnInit {
         */
     }
 
+    // Chamanda HTTP promise
     /*
-    -- Chamanda HTTP promise
     private async _getCoursesUsingPromise(): Promise<any> {
         return await fetch('/api/courses')
     }
     */
 
+    // Chamada HTTP com observable
     /*
     private _getCoursesUsingObservable(): any {
         const http$ = callHttp('/api/courses')
