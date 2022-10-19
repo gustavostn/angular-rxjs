@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { fromEvent, interval, observable, Observable, timer } from 'rxjs';
+import { concat, fromEvent, interval, observable, Observable, of, timer } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { callHtpp as callHttp } from '../common/util';
 
@@ -45,6 +45,14 @@ export class AboutComponent implements OnInit {
         Chamada promise -> this._getCoursesUsingPromise()
         Chamada com observable -> this._getCoursesUsingObservable()
         */
+
+        /*
+        -- Utilizando o método concat p/ unir 2 variaveis observables em uma só
+        const first$ = of('a', 'b', 'c')
+        const second$ = of(1,2,3)
+        const concatVariables$ = concat(first$, second$)
+        concatVariables$.subscribe(console.log)
+        */
     }
 
     /*
@@ -69,10 +77,6 @@ export class AboutComponent implements OnInit {
         )
     }
     */
-
-
-
-
 }
 
 
