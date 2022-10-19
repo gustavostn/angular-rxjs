@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { concat, fromEvent, interval, observable, Observable, of, timer } from 'rxjs';
+import { concat, fromEvent, interval, merge, observable, Observable, of, timer } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { callHtpp as callHttp } from '../common/util';
 
@@ -19,19 +19,19 @@ export class AboutComponent implements OnInit {
         interval$.subscribe(value => console.log("Stream 2:", value))
         */
 
-       // Executa o time (1000) após o tempo inicial (3000)
+        // Executa o time (1000) após o tempo inicial (3000)
         /*
         const interval$ = timer(3000, 1000);
         interval$.subscribe(value => console.log("Time: ", value))
         */
 
-       // Ouvir eventos com o rxjs (click na aplicação)
+        // Ouvir eventos com o rxjs (click na aplicação)
         /* 
         const click$ = fromEvent(document, 'click')
         click$.subscribe(evt => console.log(evt))
         */
 
-       // Possíveis retornos do subscribe
+        // Possíveis retornos do subscribe
         /*
         const clickOnDocument$ = fromEvent(document, 'click')
         clickOnDocument$.subscribe(
@@ -47,12 +47,20 @@ export class AboutComponent implements OnInit {
         Chamada com observable -> this._getCoursesUsingObservable()
         */
 
-       // Utilizando o método concat p/ unir 2 variaveis observables em uma só
+        // Utilizando o método concat p/ unir 2 variaveis observables em uma só
         /*
         const first$ = of('a', 'b', 'c')
         const second$ = of(1,2,3)
         const concatVariables$ = concat(first$, second$)
         concatVariables$.subscribe(console.log)
+        */
+
+        // Utilizando o método merge => Executar/Ouvir ações ao mesmo tempo
+        /*
+        const interval$ = interval(1000) //1s
+        const interval2$ = interval$.pipe(map(value => value * 10))
+        const mergeResult$ = merge(interval$, interval2$)
+        mergeResult$.subscribe(console.log)
         */
     }
 
