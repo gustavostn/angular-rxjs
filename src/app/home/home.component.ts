@@ -128,6 +128,8 @@ export class HomeComponent implements OnInit {
             )
     }
 
+    // Utiliazando o retryWhen para tentar executar a requisição novamente
+    // Utilizando o delayWhen p/ realizar a requisição novamente depois de 2000ms
     private _getBeginnerCoursesV5(): void {
         const response$ = callHtpp("/api/courses")
         const courses$: Observable<Course[]> = response$
