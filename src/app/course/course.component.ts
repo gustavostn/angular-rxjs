@@ -1,7 +1,7 @@
 import { AfterViewInit, Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { fromEvent, Observable } from 'rxjs';
-import { debounceTime, distinctUntilChanged, map } from 'rxjs/operators';
+import { concat, fromEvent, Observable } from 'rxjs';
+import { debounceTime, distinctUntilChanged, map, switchMap } from 'rxjs/operators';
 import { callHtpp } from '../common/util';
 import { Course } from '../model/course';
 import { Lesson } from '../model/lesson';
@@ -26,10 +26,7 @@ export class CourseComponent implements OnInit, AfterViewInit {
 
     ngOnInit(): void {
         this._idCourse = this._activatedRouter.snapshot.params.id
-
         this._getCourseInfos(this._idCourse)
-        this._getLessons(this._idCourse)
-      
     }
 
     ngAfterViewInit(): void {
@@ -37,18 +34,19 @@ export class CourseComponent implements OnInit, AfterViewInit {
             .pipe(
                 map((event: any) => event.target.value),
                 debounceTime(400), // Aguarda 400ms p/ emitir um novo evento
-                distinctUntilChanged() // So emite evento caso tenha diferença no valor
+                distinctUntilChanged(), // So emite evento caso tenha diferença no valor
+                switchMap(search => this._getLessons(this._idCourse, search)) // Caso receba uma nova informação cancela o evento antigo | Neste caso, quando recebe um novo valor, cancela a requisição antiga
             )
-        
-        this.searchBarEvent$.subscribe(console.log)
+        const initialLessonsValue$ = this._getLessons(this._idCourse, '')
+        this.lessons$ = concat(initialLessonsValue$, this.searchBarEvent$)
     }
 
     private _getCourseInfos(idCourse: number): void {
         this.course$ = callHtpp(`/api/courses/${idCourse}`)
     }
 
-    private _getLessons(idCourse: number): void {
-        this.lessons$ = callHtpp(`/api/lessons?courseId=${idCourse}&pageSize=100`)
+    private _getLessons(idCourse: number, search: string): Observable<Lesson[]> {
+        return callHtpp(`/api/lessons?courseId=${idCourse}&pageSize=100&filter=${search}`)
             .pipe(map(response => response.payload))
     }
 
