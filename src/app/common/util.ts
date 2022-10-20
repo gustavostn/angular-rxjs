@@ -7,7 +7,12 @@ export function callHtpp(url: string): Observable<any> {
         const signal = controller.signal
 
         fetch(url, { signal })
-            .then(response => { return response.json() })
+            .then(response => { 
+                if(response.ok) return response.json() 
+                else {
+                    observable.error(`Request failed with status code ${response.status}`)
+                }
+            })
             .then(body => {
                 observable.next(body)
                 observable.complete()

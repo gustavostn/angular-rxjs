@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
-import { Observable } from 'rxjs';
-import { map, shareReplay, tap } from 'rxjs/operators';
+import { Observable, of, throwError } from 'rxjs';
+import { catchError, filter, finalize, map, shareReplay, tap } from 'rxjs/operators';
 import { callHtpp } from '../common/util';
 import { Course } from '../model/course';
 
@@ -27,7 +27,8 @@ export class HomeComponent implements OnInit {
     ngOnInit() {
         //this._getBeginnerCourses()
         //this._getBeginnerCoursesV2()
-        this._getBeginnerCoursesV3()
+        // this._getBeginnerCoursesV3()
+        this._getBeginnerCoursesV4()
     }
 
     /*
@@ -46,7 +47,7 @@ export class HomeComponent implements OnInit {
     }
     */
 
-    /*
+    // Utilizando o map p/ obter o payload da requisição
     private _getBeginnerCoursesV2(): void {
         const response$ = callHtpp("/api/courses")
         const courses$: Observable<Course[]> = response$
@@ -66,8 +67,9 @@ export class HomeComponent implements OnInit {
                 )
             )
     }
-    */
 
+    // Utilizando o tap p/ saber que a requisição foi executada
+    // Utilizando o shareReplay p/ compartilhar o retorno da requisição com os subscribes
     private _getBeginnerCoursesV3(): void {
         const response$ = callHtpp("/api/courses")
         const courses$: Observable<Course[]> = response$
@@ -92,5 +94,36 @@ export class HomeComponent implements OnInit {
             )
     }
 
+    // Utiliazando o catchError para validar os erros da requisição
+    // Utilizando o finalize p/ saber quando a requisição foi finalizada
+    private _getBeginnerCoursesV4(): void {
+        const response$ = callHtpp("/api/courses")
+        const courses$: Observable<Course[]> = response$
+            .pipe(
+                catchError(
+                    err => {
+                        console.log(`Some error occured: ${err}`)
+                        return throwError(err)
+                    }
+                ),
+                tap(() => console.log("HTTP executed")),
+                map(response => response.payload),
+                shareReplay(),
+                finalize(() => console.warn("Finalize request"))
+            )
 
+        this.beginners$ = courses$
+            .pipe(
+                map(response => response
+                    .filter((course: Course) => course.category === "BEGINNER")
+                )
+            )
+
+        this.advanced$ = courses$
+            .pipe(
+                map(response => response
+                    .filter((course: Course) => course.category === "ADVANCED")
+                )
+            )
+    }
 }
