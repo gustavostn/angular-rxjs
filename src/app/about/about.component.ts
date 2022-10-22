@@ -1,7 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { concat, fromEvent, interval, merge, observable, Observable, of, timer } from 'rxjs';
-import { map } from 'rxjs/operators';
-import { callHtpp, callHtpp as callHttp } from '../common/util';
+import { AsyncSubject, BehaviorSubject, ReplaySubject, Subject } from 'rxjs';
 
 @Component({
     selector: 'about',
@@ -11,91 +9,95 @@ import { callHtpp, callHtpp as callHttp } from '../common/util';
 
 export class AboutComponent implements OnInit {
 
+    // Utilizando subject p/ criar um observable
+    // Neste caso estou me inscrevendo no evento e emitindo os eventos depois
+    // Logo irei escutar estes eventos emitidos
+    /*
     ngOnInit() {
-        // Interval com rxjs
-        /*
-        const interval$ = interval(1000)
-        interval$.subscribe(value => console.log("Stream 1:", value))
-        interval$.subscribe(value => console.log("Stream 2:", value))
-        */
-
-        // Executa o time (1000) após o tempo inicial (3000)
-        /*
-        const interval$ = timer(3000, 1000);
-        interval$.subscribe(value => console.log("Time: ", value))
-        */
-
-        // Ouvir eventos com o rxjs (click na aplicação)
-        /* 
-        const click$ = fromEvent(document, 'click')
-        click$.subscribe(evt => console.log(evt))
-        */
-
-        // Possíveis retornos do subscribe
-        /*
-        const clickOnDocument$ = fromEvent(document, 'click')
-        clickOnDocument$.subscribe(
-            evt => console.log('Get events: ', evt),
-            err => console.log('Get streams errs: ', err),
-            () => console.log('Completed')
-        )
-        */
-
-        // Chamando o método p/ realizar a requisição http com promise ou observable
-        /*
-        Chamada promise -> this._getCoursesUsingPromise()
-        Chamada com observable -> this._getCoursesUsingObservable()
-        */
-
-        // Utilizando o método concat p/ unir 2 variaveis observables em uma só
-        /*
-        const first$ = of('a', 'b', 'c')
-        const second$ = of(1,2,3)
-        const concatVariables$ = concat(first$, second$)
-        concatVariables$.subscribe(console.log)
-        */
-
-        // Utilizando o método merge => Executar/Ouvir ações ao mesmo tempo
-        /*
-        const interval$ = interval(1000) //1s
-        const interval2$ = interval$.pipe(map(value => value * 10))
-        const mergeResult$ = merge(interval$, interval2$)
-        mergeResult$.subscribe(console.log)
-        */
-        this._callGetCourses()
-    }
-
-    // Chamanda HTTP promise
-    /*
-    private async _getCoursesUsingPromise(): Promise<any> {
-        return await fetch('/api/courses')
+        const subject = new Subject()
+        const subsInSubject$ = subject.asObservable()
+        subsInSubject$.subscribe(console.log) // Inscrevendo no evento
+        subject.next("Emissão 1")
+        subject.next("Emissão 2")
+        subject.next("Emissão 3")
+        subject.complete() // Complemento evento
     }
     */
 
-    // Chamada HTTP com observable
-    /*
-    private _getCoursesUsingObservable(): any {
-        const http$ = callHttp('/api/courses')
-        const courses$ = http$
-            .pipe(
-                map(response => response.payload)
-            )
 
-        courses$.subscribe(
-            response => console.log(response),
-            err => console.error('error response: ', err),
-            () => console.warn("Completed!")
-        )
+    // Neste exemplo estamos utilizando o AsyncSubject
+    // So irei receber o valor emitido quando o subject for completado: Apos utilizar o complete()
+    // Inscrições realizadas APÓS a emissão do evento irão receber o ultimo valor emitido
+    /*
+    ngOnInit(): void {
+        const subject = new AsyncSubject()
+        const subsInSubject$ = subject.asObservable()
+        subsInSubject$.subscribe(val => console.log("Inscrição ANTES das emissões, valor recebido: " + val)) // Inscrevendo no evento
+        subject.next("Emissão 1")
+        subject.next("Emissão 2")
+        subject.next("Emissão 3")
+        subject.complete() // Complemento evento
+
+        setTimeout(() => {
+            subsInSubject$.subscribe(val => console.log("Inscrição DEPOIS das emissões, valor recebido: " + val))
+        }, 2500);
     }
     */
 
-    // Neste exemplo ao realizar o unsubscribe no subscribe ele cancela a requisição HTTP (Caso esteja em processo)
-    private _callGetCourses(): any {
-        const http$ = callHtpp('api/courses')
-        const sub = http$.subscribe(console.log)
+    // Neste exemplo estamos utilizando o ReplaySubject
+    // Ao realizar a inscrição irei receber todos os valores que foram emitidos
+    // Inscrições realizadas APÓS a emissão tambem ira receber todos os valores emitidos
+    ngOnInit(): void {
+        const subject = new ReplaySubject()
+        const subsInSubject$ = subject.asObservable()
+        subsInSubject$.subscribe(val => console.log("Inscrição ANTES das emissões, valor recebido: " + val)) // Inscrevendo no evento
+        subject.next("Emissão 1")
+        subject.next("Emissão 2")
+        subject.next("Emissão 3")
+        subject.complete() // Complemento evento
 
-        setTimeout(() => { sub.unsubscribe() }, 0);
+        setTimeout(() => {
+            subsInSubject$.subscribe(val => console.log("Inscrição DEPOIS das emissões, valor recebido: " + val))
+        }, 2500);
     }
+
+
+    // Neste exemplo estou realizando a inscrição nos eventos DEPOIS que as emissões foram realizadas
+    // Utilizando o Subject não tenho acesso a eventos antigos, caso me inscreva após esses eventos terem sidos realizados
+    // So irei receber os realizados após a inscrição
+    /*
+    ngOnInit(): void {
+        const subject = new Subject()
+        const subsInSubject$ = subject.asObservable()
+        subsInSubject$.subscribe(sub => console.log("Inscrição antes das emissões: " + sub))
+        subject.next("Emissão 1")
+        subject.next("Emissão 2")
+        subject.next("Emissão 3")
+        subsInSubject$.subscribe(sub => console.log("Inscrição pós emissão: " + sub)) // Inscrevendo no evento pós ter sido realizada as emissão
+        subject.complete() // Complemento evento
+    }
+    */
+
+    // Neste exemplo está sendo utilziando o behaviorSubject
+    // Necessario ter uma valor inicial
+    // Ao se inscrever antes da emissão de novos eventos: 1* - Recebe o valor inicial depois os novos valores
+    // Ao se inscrever depois de eventos emitidos: Recebe o ultimo valor emitido
+    /*
+    ngOnInit(): void {
+        const behaviorSubject = new BehaviorSubject("Valor inicial")
+        const subInBehaviorSubject$ = behaviorSubject.asObservable()
+        subInBehaviorSubject$.subscribe(val => console.log("Inscrição antes das emissões, valor recebido: " + val))
+
+        behaviorSubject.next("Emissão 1")
+        behaviorSubject.next("Emissão 2")
+        behaviorSubject.next("Emissão 3")
+
+        setTimeout(() => {
+            subInBehaviorSubject$.subscribe(val => console.log("Inscrição DEPOIS das emissões, valor recebido: " + val))
+        }, 2500);
+    }
+    */
+
 }
 
 
