@@ -1,7 +1,7 @@
 import { AfterViewInit, Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { concat, fromEvent, Observable } from 'rxjs';
-import { debounceTime, distinctUntilChanged, map, startWith, switchMap } from 'rxjs/operators';
+import { concat, fromEvent, interval, Observable } from 'rxjs';
+import { debounceTime, distinctUntilChanged, map, startWith, switchMap, throttle, throttleTime } from 'rxjs/operators';
 import { callHtpp } from '../common/util';
 import { Course } from '../model/course';
 import { Lesson } from '../model/lesson';
@@ -44,7 +44,9 @@ export class CourseComponent implements OnInit, AfterViewInit {
     }
     */
 
-    // Neste caso estamos setando que o valor inicial da busca será uma string vazia
+    // Neste caso estamos setando que o valor inicial da busca será uma string vazia utilizando o startWith('')
+    // E tambem utilizando o debounceTime(400) p/ aguardar 400ms p/ emitir um novo evento
+    /*
     ngAfterViewInit(): void {
         this.lessons$ = fromEvent(this._searchInput.nativeElement, "keyup")
             .pipe(
@@ -55,12 +57,41 @@ export class CourseComponent implements OnInit, AfterViewInit {
                 switchMap(search => this._getLessons(this._idCourse, search)) // Caso receba uma nova informação cancela o evento antigo | Neste caso, quando recebe um novo valor, cancela a requisição antiga
             )
     }
+    */
 
+    // Neste evento está sendo utilizado o throttle() p/ emitir eventos depois de um determinado tempo
+    // O problema de utilizar deste modo é que podemos não ter o ultimo evento do usuario
+    /*
+    ngAfterViewInit(): void {
+        this.lessons$ = fromEvent(this._searchInput.nativeElement, "keyup")
+            .pipe(
+                map((event: any) => event.target.value),
+                startWith(''),
+                throttle(() => interval(400)), // Deste modo estamos passando um observable p/ o Throttle que irá emitir um evento apos 400ms
+                distinctUntilChanged(), // So emite evento caso tenha diferença no valor
+                switchMap(search => this._getLessons(this._idCourse, search)) // Caso receba uma nova informação cancela o evento antigo | Neste caso, quando recebe um novo valor, cancela a requisição antiga
+            )
+    }
+     */
+
+    // Neste evento está sendo utilizado o throttleTime() p/ emitir eventos depois de um determinado tempo
+    ngAfterViewInit(): void {
+        this.lessons$ = fromEvent(this._searchInput.nativeElement, "keyup")
+            .pipe(
+                map((event: any) => event.target.value),
+                startWith(''),
+                throttleTime(400), // Utilizando o throttleTime p/ auto emitir evento apos determinado tempo
+                distinctUntilChanged(), // So emite evento caso tenha diferença no valor
+                switchMap(search => this._getLessons(this._idCourse, search)) // Caso receba uma nova informação cancela o evento antigo | Neste caso, quando recebe um novo valor, cancela a requisição antiga
+            )
+    }
+    
     private _getCourseInfos(idCourse: number): void {
         this.course$ = callHtpp(`/api/courses/${idCourse}`)
     }
 
     private _getLessons(idCourse: number, search: string): Observable<Lesson[]> {
+        console.log(search);
         return callHtpp(`/api/lessons?courseId=${idCourse}&pageSize=100&filter=${search}`)
             .pipe(map(response => response.payload))
     }
