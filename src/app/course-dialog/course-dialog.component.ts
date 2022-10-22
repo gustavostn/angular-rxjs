@@ -5,13 +5,14 @@ import {FormBuilder, Validators, FormGroup} from "@angular/forms";
 import * as moment from 'moment';
 import { concatMap, exhaustMap, filter, mergeMap,  } from 'rxjs/operators';
 import { concat, from, fromEvent, Observable } from 'rxjs';
+import { StoreService } from '../common/store.service';
 
 @Component({
     selector: 'course-dialog',
     templateUrl: './course-dialog.component.html',
     styleUrls: ['./course-dialog.component.css']
 })
-export class CourseDialogComponent implements OnInit, AfterViewInit {
+export class CourseDialogComponent implements OnInit {
 
     form: FormGroup;
 
@@ -24,9 +25,9 @@ export class CourseDialogComponent implements OnInit, AfterViewInit {
     constructor(
         private fb: FormBuilder,
         private dialogRef: MatDialogRef<CourseDialogComponent>,
-        @Inject(MAT_DIALOG_DATA) course:Course
+        @Inject(MAT_DIALOG_DATA) course:Course,
+        private _storeService: StoreService
     ) {
-
         this.course = course;
 
         this.form = fb.group({
@@ -35,50 +36,20 @@ export class CourseDialogComponent implements OnInit, AfterViewInit {
             releasedAt: [moment(), Validators.required],
             longDescription: [course.longDescription,Validators.required]
         });
-
     }
 
-    ngOnInit(): void {
-        // this._subscribeUsingConcactMap()
-        this._subscribeUsingMergeMap()
-    }
-
-    ngAfterViewInit(): void {
-        fromEvent(this.saveButton.nativeElement, "click")
-            .pipe(exhaustMap(_ => this._saveCourse(this.form.value))) // Ignora novas requisições enquanto a anterior não finalizar
-            .subscribe()
-    }
-
-    private _subscribeUsingConcactMap(): void {
-        this.form.valueChanges
-            .pipe(
-                filter(_ => this.form.valid),
-                concatMap(changes => this._saveCourse(changes)) // Aguarda a conclusão da requisição p/ então iniciar uma nova
-            )
-            .subscribe()
-    }
-    
-    private _subscribeUsingMergeMap(): void {
-        this.form.valueChanges
-        .pipe(
-            filter(_ => this.form.valid),
-            mergeMap(changes => this._saveCourse(changes)) // Realiza uma nova requisição assim que a anterior for iniciada
-        )
-        .subscribe()
-    }
-
-    private _saveCourse(changes): Observable<any> {
-        return from(fetch(`api/courses/${this.course.id}`, {
-            method: 'PUT',
-            body: JSON.stringify(changes),
-            headers: { 'content-type': 'application/json' }
-        }));
-    }
+    ngOnInit(): void { }
 
     close() {
         this.dialogRef.close();
     }
 
-    save() { }
+    public save(): void { 
+        this._storeService.saveChangesInCourse(this.course.id, this.form.value)
+            .subscribe(
+                _ => this.close(),
+                err => console.error("Ocorreu um erro ao atualizar as informações do curso: ", err)
+            )
+    }
 
 }
