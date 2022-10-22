@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { BehaviorSubject, Subject } from 'rxjs';
+import { AsyncSubject, BehaviorSubject, Subject } from 'rxjs';
 
 @Component({
     selector: 'about',
@@ -24,6 +24,27 @@ export class AboutComponent implements OnInit {
     }
     */
 
+
+    // Utilizando subject p/ criar um observable
+    // Neste exemplo estamos utilizando o asyncSubject
+    // So irei receber o valor emitido quando o subject for completado: Apos utilizar o complete()
+    // Inscrições realizadas APÓS a emissão do evento irão receber o ultimo valor emitido
+    ngOnInit(): void {
+        const subject = new AsyncSubject()
+        const subsInSubject$ = subject.asObservable()
+        subsInSubject$.subscribe(val => console.log("Inscrição ANTES das emissões, valor recebido: " + val)) // Inscrevendo no evento
+        subject.next("Emissão 1")
+        subject.next("Emissão 2")
+        subject.next("Emissão 3")
+        subject.complete() // Complemento evento
+
+        setTimeout(() => {
+            subsInSubject$.subscribe(val => console.log("Inscrição DEPOIS das emissões, valor recebido: " + val))
+        }, 2500);
+        
+    }
+
+
     // Neste exemplo estou realizando a inscrição nos eventos DEPOIS que as emissões foram realizadas
     // Utilizando o Subject não tenho acesso a eventos antigos, caso me inscreva após esses eventos terem sidos realizados
     // So irei receber os realizados após a inscrição
@@ -44,6 +65,7 @@ export class AboutComponent implements OnInit {
     // Necessario ter uma valor inicial
     // Ao se inscrever antes da emissão de novos eventos: 1* - Recebe o valor inicial depois os novos valores
     // Ao se inscrever depois de eventos emitidos: Recebe o ultimo valor emitido
+    /*
     ngOnInit(): void {
         const behaviorSubject = new BehaviorSubject("Valor inicial")
         const subInBehaviorSubject$ = behaviorSubject.asObservable()
@@ -57,6 +79,7 @@ export class AboutComponent implements OnInit {
             subInBehaviorSubject$.subscribe(val => console.log("Inscrição DEPOIS das emissões, valor recebido: " + val))
         }, 2500);
     }
+    */
 
 }
 
