@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { Subject } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
 
 @Component({
     selector: 'about',
@@ -27,6 +27,7 @@ export class AboutComponent implements OnInit {
     // Neste exemplo estou realizando a inscrição nos eventos DEPOIS que as emissões foram realizadas
     // Utilizando o Subject não tenho acesso a eventos antigos, caso me inscreva após esses eventos terem sidos realizados
     // So irei receber os realizados após a inscrição
+    /*
     ngOnInit(): void {
         const subject = new Subject()
         const subsInSubject$ = subject.asObservable()
@@ -36,6 +37,25 @@ export class AboutComponent implements OnInit {
         subject.next("Emissão 3")
         subsInSubject$.subscribe(sub => console.log("Inscrição pós emissão: " + sub)) // Inscrevendo no evento pós ter sido realizada as emissão
         subject.complete() // Complemento evento
+    }
+    */
+
+    // Neste exemplo está sendo utilziando o behaviorSubject
+    // Necessario ter uma valor inicial
+    // Ao se inscrever antes da emissão de novos eventos: 1* - Recebe o valor inicial depois os novos valores
+    // Ao se inscrever depois de eventos emitidos: Recebe o ultimo valor emitido
+    ngOnInit(): void {
+        const behaviorSubject = new BehaviorSubject("Valor inicial")
+        const subInBehaviorSubject$ = behaviorSubject.asObservable()
+        subInBehaviorSubject$.subscribe(val => console.log("Inscrição antes das emissões, valor recebido: " + val))
+
+        behaviorSubject.next("Emissão 1")
+        behaviorSubject.next("Emissão 2")
+        behaviorSubject.next("Emissão 3")
+
+        setTimeout(() => {
+            subInBehaviorSubject$.subscribe(val => console.log("Inscrição DEPOIS das emissões, valor recebido: " + val))
+        }, 2500);
     }
 
 }
