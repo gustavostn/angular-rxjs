@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Observable, of, throwError, timer } from 'rxjs';
 import { catchError, delayWhen, filter, finalize, map, retryWhen, shareReplay, tap } from 'rxjs/operators';
+import { StoreService } from '../common/store.service';
 import { callHtpp } from '../common/util';
 import { Course } from '../model/course';
 
@@ -16,10 +17,11 @@ export class HomeComponent implements OnInit {
     public beginners$: Observable<Course[]>
     public advanced$: Observable<Course[]>
 
-    constructor() { }
+    constructor(private _storeService: StoreService) { }
 
-    ngOnInit() {
-
+    ngOnInit() { 
+        this.beginners$ = this._storeService.getCoursesByCategory("BEGINNER")
+        this.advanced$ = this._storeService.getCoursesByCategory("ADVANCED")
     }
 
 
