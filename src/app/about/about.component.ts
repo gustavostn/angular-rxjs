@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { AsyncSubject, BehaviorSubject, Subject } from 'rxjs';
+import { AsyncSubject, BehaviorSubject, ReplaySubject, Subject } from 'rxjs';
 
 @Component({
     selector: 'about',
@@ -25,10 +25,10 @@ export class AboutComponent implements OnInit {
     */
 
 
-    // Utilizando subject p/ criar um observable
-    // Neste exemplo estamos utilizando o asyncSubject
+    // Neste exemplo estamos utilizando o AsyncSubject
     // So irei receber o valor emitido quando o subject for completado: Apos utilizar o complete()
     // Inscrições realizadas APÓS a emissão do evento irão receber o ultimo valor emitido
+    /*
     ngOnInit(): void {
         const subject = new AsyncSubject()
         const subsInSubject$ = subject.asObservable()
@@ -41,7 +41,24 @@ export class AboutComponent implements OnInit {
         setTimeout(() => {
             subsInSubject$.subscribe(val => console.log("Inscrição DEPOIS das emissões, valor recebido: " + val))
         }, 2500);
-        
+    }
+    */
+
+    // Neste exemplo estamos utilizando o ReplaySubject
+    // Ao realizar a inscrição irei receber todos os valores que foram emitidos
+    // Inscrições realizadas APÓS a emissão tambem ira receber todos os valores emitidos
+    ngOnInit(): void {
+        const subject = new ReplaySubject()
+        const subsInSubject$ = subject.asObservable()
+        subsInSubject$.subscribe(val => console.log("Inscrição ANTES das emissões, valor recebido: " + val)) // Inscrevendo no evento
+        subject.next("Emissão 1")
+        subject.next("Emissão 2")
+        subject.next("Emissão 3")
+        subject.complete() // Complemento evento
+
+        setTimeout(() => {
+            subsInSubject$.subscribe(val => console.log("Inscrição DEPOIS das emissões, valor recebido: " + val))
+        }, 2500);
     }
 
 
