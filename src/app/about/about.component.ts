@@ -62,7 +62,6 @@ export class AboutComponent implements OnInit {
         const mergeResult$ = merge(interval$, interval2$)
         mergeResult$.subscribe(console.log)
         */
-
         this._callGetCourses()
     }
 
@@ -90,6 +89,7 @@ export class AboutComponent implements OnInit {
     }
     */
 
+    // Neste exemplo ao realizar o unsubscribe no subscribe ele cancela a requisição HTTP (Caso esteja em processo)
     private _callGetCourses(): any {
         const http$ = callHtpp('api/courses')
         const sub = http$.subscribe(console.log)
