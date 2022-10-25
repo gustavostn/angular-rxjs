@@ -1,7 +1,8 @@
 import { AfterViewInit, Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { concat, fromEvent, interval, Observable } from 'rxjs';
-import { debounceTime, distinctUntilChanged, map, startWith, switchMap, throttle, throttleTime } from 'rxjs/operators';
+import { debounceTime, distinctUntilChanged, first, map, startWith, switchMap, throttle, throttleTime } from 'rxjs/operators';
+import { StoreService } from '../common/store.service';
 import { callHtpp } from '../common/util';
 import { Course } from '../model/course';
 import { Lesson } from '../model/lesson';
@@ -16,16 +17,21 @@ export class CourseComponent implements OnInit, AfterViewInit {
 
     @ViewChild("searchInput", { static: false }) private _searchInput: ElementRef
 
-    public course$: Observable<Course[]>
+    public course$: Observable<Course>
     public lessons$: Observable<Lesson[]>
     public searchBarEvent$: Observable<any>
 
     private _idCourse: number = 0
 
-    constructor(private _activatedRouter: ActivatedRoute) { }
+    constructor(
+        private _activatedRouter: ActivatedRoute,
+        private _storeService: StoreService
+    ) { }
 
     ngOnInit(): void {
         this._idCourse = this._activatedRouter.snapshot.params.id
+        this.course$ = this._storeService.getCourseById(this._idCourse)
+        
         this._getCourseInfos(this._idCourse)
     }
 
@@ -91,7 +97,6 @@ export class CourseComponent implements OnInit, AfterViewInit {
     }
 
     private _getLessons(idCourse: number, search: string): Observable<Lesson[]> {
-        console.log(search);
         return callHtpp(`/api/lessons?courseId=${idCourse}&pageSize=100&filter=${search}`)
             .pipe(map(response => response.payload))
     }
